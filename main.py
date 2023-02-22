@@ -91,10 +91,7 @@ if __name__=="__main__":
     web = Webscrape('https://www.etsy.com/uk/','debug')
 
     url = web.findListing()
-    print(url)
     web.loveListing(url)
     
-    # web.loveListing('https://www.etsy.com/uk/listing/1401070274/biscuit-herb-tobacco-grinder?ga_order=most_relevant&ga_search_type=all&ga_view_type=gallery&ga_search_query=grinder&ref=sr_gallery-1-8&frs=1&organic_search_click=1', True)
-
 
 
