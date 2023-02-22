@@ -25,6 +25,7 @@ class Webscrape:
         self.driver = webdriver.Remote(command_executor='http://localhost:4444/wd/hub', options=options)
         self.driver.get(websiteURL)
         self.websiteURL = websiteURL
+        self.originalWindow = self.driver.current_window_handle
 
     def findListing(self):
         # accept cookies
@@ -43,14 +44,23 @@ class Webscrape:
         # wait for page to load, then select listing containing 'Biscuit Herb'
         web.driver.find_element(By.XPATH, "//*[contains(text(), 'Biscuit Herb')]").click()
 
+        # Wait for the new window or tab
+        WebDriverWait(web.driver, 10).until(EC.number_of_windows_to_be(2))
+
+        # Loop through until we find a new window handle
+        for window_handle in self.driver.window_handles:
+            if window_handle != self.originalWindow:
+                self.driver.switch_to.window(window_handle)
+                break
+
         return web.driver.current_url
 
 
-    def loveListing(self, url):
-        web.driver.get(url)
-
-        # accept cookies
-        web.driver.find_element(By.XPATH, '//*[@id="gdpr-single-choice-overlay"]/div/div[2]/div[2]/button').click() 
+    def loveListing(self, url="none", acceptCookies=False):
+        if url != "none":
+            web.driver.get(url)
+        if acceptCookies:
+            web.driver.find_element(By.XPATH, '//*[@id="gdpr-single-choice-overlay"]/div/div[2]/div[2]/button').click() 
         
         # add to favourites using listing id 1401070274
         web.driver.find_element(By.CSS_SELECTOR, "button[data-listing-id='1401070274']").click()
@@ -80,9 +90,11 @@ if __name__=="__main__":
     # create new driver
     web = Webscrape('https://www.etsy.com/uk/','debug')
 
-    # url = web.findListing()
+    url = web.findListing()
+    print(url)
+    web.loveListing(url)
     
-    web.loveListing('https://www.etsy.com/uk/listing/1401070274/biscuit-herb-tobacco-grinder?ga_order=most_relevant&ga_search_type=all&ga_view_type=gallery&ga_search_query=grinder&ref=sr_gallery-1-8&frs=1&organic_search_click=1')
+    # web.loveListing('https://www.etsy.com/uk/listing/1401070274/biscuit-herb-tobacco-grinder?ga_order=most_relevant&ga_search_type=all&ga_view_type=gallery&ga_search_query=grinder&ref=sr_gallery-1-8&frs=1&organic_search_click=1', True)
 
 
 
